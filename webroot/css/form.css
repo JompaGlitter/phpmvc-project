@@ -1,0 +1,40 @@
+/**
+ * Style for forms
+ */
+label {
+    font-size: smaller;
+}
+
+input[type=text],
+input[type=password] {
+    font-size: 1.2em;
+    width: 500px;
+}
+
+input[type=submit],
+input[type=reset] {
+    font-size: 1.1em;
+}
+
+form[method=post] legend {
+    font-weight: bold;
+}
+
+textarea {
+    font-size: 1.2em;
+    width: 500px;
+    min-height: 200px;
+}
+
+p.buttons {
+    padding-top: 22px;
+    padding-bottom: 22px;
+}
+
+.comment-form {
+    width: 700px;
+    display: block;
+    clear: both;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}

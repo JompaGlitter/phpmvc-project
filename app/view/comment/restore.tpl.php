@@ -1,0 +1,2 @@
+<i class="fa fa-trash-o"></i> <a href="<?=$this->url->create('comment/remove-all/' . $pagekey)?>">Radera alla inlägg</a>
+<i class="fa fa-refresh"></i> <a href="<?=$this->url->create('comment/setup-comments')?>">Återställ databas</a>

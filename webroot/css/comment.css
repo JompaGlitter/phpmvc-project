@@ -1,0 +1,50 @@
+
+div.comments-header,
+div.comments {
+    width: 700px;
+    display: block;
+    clear: both;
+}
+
+div.comments-header {
+    padding-top: 20px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #ccc;
+}
+
+div.no-comment {
+    padding-top: 20px;
+    padding-bottom: 30px;
+    font-style: italic;
+}
+
+div.comments {
+    padding-top: 10px;
+    padding-bottom: 30px;
+}
+
+
+
+div.comment-container {
+    overflow: hidden;
+    border-bottom: 1px solid #ccc;
+    }
+
+div.comment-text {
+    display: block;
+    padding: 5px;
+}
+
+div.comment-author-container {
+    display: block;
+    float: right;
+    clear: both;
+    padding: 5px;
+    margin: 10px;
+    background-color: #ecf1ef;
+    font-size: 0.8em;
+}
+
+div.author-name {
+    font-weight: bold;
+}

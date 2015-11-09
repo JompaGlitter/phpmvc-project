@@ -1,0 +1,151 @@
+<?php
+/**
+ * This is a Idun front controller for my personal site.
+ *
+ */
+
+// Get the enviroment, autoloader and the $app object
+require __DIR__.'/config_with_app.php';
+
+
+
+// Set link creation to 'clean' for a nice, clean link displayment
+$app->url->setUrlType(\Anax\Url\CUrl::URL_CLEAN);
+
+// Add site specifik configurations
+$app->theme->configure(ANAX_APP_PATH . '/config/theme_me.php');
+
+// Add site specifik navbar
+$app->navbar->configure(ANAX_APP_PATH . '/config/navbar_me.php');
+
+
+
+
+// Home rout, the 'me' page
+$app->router->add('', function() use ($app) {
+    
+    $app->theme->addStylesheet('css/form.css');
+    $app->theme->addStylesheet('css/comment.css');
+    $app->theme->setTitle("Om mig");
+    
+    $content = $app->fileContent->get('me.md');
+    $content = $app->textFilter->doFilter($content, 'shortcode, markdown');
+    
+    $byline  = $app->fileContent->get('byline.md');
+    $byline  = $app->textFilter->doFilter($byline, 'shortcode, markdown');
+    
+    // View for main and byline content
+    $app->views->add('me/page', [
+        'content' => $content,
+        'byline' => $byline,
+    ]);
+    
+    // Dispatcher for comments view
+    $app->dispatcher->forward([
+        'controller' => 'comment',
+        'action'     => 'view',
+        'params'    => ['me'],
+    ]);
+    
+    // Dispatcher for comments form
+    $app->dispatcher->forward([
+        'controller' => 'comment',
+        'action'     => 'add',
+        'params'     => ['me'],
+    ]);
+    
+    // View for comment setup or to delete all comments
+    $app->views->add('comment/restore', [
+        'pagekey' => 'me',
+    ]);
+
+});
+
+
+
+// Rout to SmallTalk, the discussion page
+$app->router->add('smalltalk', function() use ($app) {
+
+    $app->theme->addStylesheet('css/form.css');
+    $app->theme->addStylesheet('css/comment.css');
+    $app->theme->setTitle("Välkommen till SmallTalk");
+    $app->views->add('comment/index');
+
+    // Dispatcher for comments view
+    $app->dispatcher->forward([
+        'controller' => 'comment',
+        'action'     => 'view',
+        'params'    => ['smalltalk'],
+    ]);
+
+    // Dispatcher for comments form
+    $app->dispatcher->forward([
+        'controller' => 'comment',
+        'action'     => 'add',
+        'params'     => ['smalltalk'],
+    ]);
+    
+    // View for comment setup or to delete all comments
+    $app->views->add('comment/restore', [
+        'pagekey' => 'smalltalk',
+    ]);
+    
+});
+
+
+
+
+// Router to setup/restore default users
+$app->router->add('setup', function () use ($app) {
+
+    //$app->db->setVerbose();
+    $app->dispatcher->forward([
+        'controller' => 'users',
+        'action'     => 'setup-users',
+    ]);
+ 
+});
+
+
+
+// Router for viewing and editing users
+$app->router->add('users', function () use ($app) {
+
+    $app->theme->setTitle("Visa alla användare");
+
+    // Display all users in database
+    $app->dispatcher->forward([
+        'controller' => 'users',
+        'action'     => 'list',
+    ]);
+
+});
+
+
+
+// Rout to show source code
+$app->router->add('source', function() use ($app) {
+    
+    $app->theme->addStylesheet('css/source.css');
+    $app->theme->setTitle("Källkod");
+    
+    $source = new \Mos\Source\CSource([
+        'secure_dir' => '..',
+        'base_dir' => '..',
+        'add_ignore' => ['.htaccess'],
+    ]);
+    
+    $app->views->add('source/source', [
+       'content' => $source->View(), 
+    ]);
+
+});
+
+
+
+
+// Check for matching routes and dispatch to controller/handler of route
+$app->router->handle();
+
+// Leave the rest to the rendering phase
+$app->theme->render();
