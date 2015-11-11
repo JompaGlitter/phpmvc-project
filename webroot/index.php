@@ -21,13 +21,13 @@ $app->navbar->configure(ANAX_APP_PATH . '/config/navbar_me.php');
 
 
 
-// Home rout, the 'me' page
+// Route to Index page
 $app->router->add('', function() use ($app) {
     
     $app->theme->addStylesheet('css/form.css');
     $app->theme->addStylesheet('css/comment.css');
-    $app->theme->setTitle("Om mig");
-    
+    $app->theme->setTitle("Välkommen till Allt om Programmering");
+    /*
     $content = $app->fileContent->get('WGTOTW.md');
     $content = $app->textFilter->doFilter($content, 'shortcode, markdown');
 
@@ -35,12 +35,18 @@ $app->router->add('', function() use ($app) {
     $app->views->add('default/article', [
         'content' => $content
     ]);
+    */
+    
+    $app->dispatcher->forward([
+        'controller' => 'forum',
+        'action' => 'view-index-page'
+    ]);
 
 });
 
 
 
-// Rout to SmallTalk, the discussion page
+// Route to Questions page
 $app->router->add('questions', function() use ($app) {
 
     $app->theme->addStylesheet('css/form.css');
@@ -49,7 +55,7 @@ $app->router->add('questions', function() use ($app) {
     
     // Prepare the page content.
     $app->theme->setVariable('main', "
-                   <h1>Frågor</h1>
+                   <h2>Frågor</h2>
                    <p>Här visas en lista med alla frågor.</p>
                    ");
     
@@ -63,14 +69,14 @@ $app->router->add('questions', function() use ($app) {
 
 
 
-// Rout to SmallTalk, the discussion page
+// Route to Tags page
 $app->router->add('tags', function() use ($app) {
 
     $app->theme->setTitle("Taggar");
     
-    // Prepare the page content.
+    // Prepare some page presentation.
     $app->theme->setVariable('main', "
-                   <h1>Taggar</h1>
+                   <h2>Taggar</h2>
                    <p>Här visas alla taggar som en fråga kan ha.</p>
                    ");
     
@@ -84,10 +90,16 @@ $app->router->add('tags', function() use ($app) {
 
 
 
-// Router for viewing and editing users
+// Route to Users page
 $app->router->add('users', function () use ($app) {
 
     $app->theme->setTitle("Användare");
+    
+    // Prepare some page presentation.
+    $app->theme->setVariable('main', "
+                   <h2>Användare</h2>
+                   <p>Här visas alla registrerade användare på sidan.</p>
+                   ");
 
     // Dispatcher to show all users
     $app->dispatcher->forward([
@@ -99,17 +111,47 @@ $app->router->add('users', function () use ($app) {
 
 
 
-// Rout to SmallTalk, the discussion page
+// Route to Question form
 $app->router->add('ask', function() use ($app) {
 
-    $app->theme->setTitle("Ställ ny fråga");
+    $app->theme->setTitle("Skapa ny fråga");
     
-    // Prepare the page content.
+    // Prepare some page presentation.
     $app->theme->setVariable('main', "
-                   <h1>Ställ ny fråga</h1>
+                   <h2>Skapa ny fråga</h2>
                    <p>Snart kan du ställa nya frågor på sidan.</p>
                    ");
     
+});
+
+
+
+// Route to Login page
+$app->router->add('login', function() use ($app) {
+
+    $app->theme->setTitle('Logga in');
+    
+    // Prepare some page presentation.
+    $app->theme->setVariable('main', "
+                   <h2>Logga in</h2>
+                   <p>Här kan du snart logga in.</p>
+                   ");
+    
+});
+
+
+
+// Route to About page
+$app->router->add('about', function() use ($app) {
+
+    $app->theme->setTitle('Om sidan');
+    
+    // Prepare some page presentation.
+    $app->theme->setVariable('main', "
+                   <h2>Om sidan</h2>
+                   <p>En liten presentation av sidan och mig som skapare kommer snart här.</p>
+                   ");
+
 });
 
 

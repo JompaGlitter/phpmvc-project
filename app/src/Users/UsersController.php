@@ -17,16 +17,20 @@ class UsersController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    public function viewAllUsersAction()
+    public function viewAllUsersAction($i_users = null)
     {
-        
+        if (!is_null($i_users)) {
+            $users = $i_users;
+            
+        } else {
         $this->db->select('id, username, gravatar, created')
                  ->from('Users')
                  ->orderBy('username ASC')
                  ->execute();
         
         $users = $this->db->fetchAll();
- 
+        }
+        
         $this->views->add('users/list-all', [
             'users' => $users,
             'title' => "Användare"

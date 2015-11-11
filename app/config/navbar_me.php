@@ -41,9 +41,23 @@ return [
         
         // This is a menu item
         'ask'  => [
-            'text'  => 'Ställ ny fråga',
+            'text'  => '* Skapa ny fråga',
             'url'   => $this->di->get('url')->create('ask'),
-            'title' => 'Ställ ny fråga',
+            'title' => 'Skapa ny fråga',
+        ],
+        
+        // This is a menu item
+        'login'  => [
+            'text'  => 'Logga in',
+            'url'   => $this->di->get('url')->create('login'),
+            'title' => 'Logga in',
+        ],
+        
+        // This is a menu item
+        'about'  => [
+            'text'  => 'Om sidan',
+            'url'   => $this->di->get('url')->create('about'),
+            'title' => 'Om sidan',
         ],
  
         // This is a menu item

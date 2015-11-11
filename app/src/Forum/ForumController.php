@@ -49,9 +49,77 @@ class ForumController implements \Anax\DI\IInjectionAware
                  ->execute();
         $p_tags = $this->db->fetchAll();
         
-        $this->views->add('forum/index'[
-            ''
+        
+        // Count questions
+        $sql_question = $this->db->select('COUNT(Q.username)')
+                                 ->from('Questions AS Q')
+                                 ->where('Q.username = U.username');
+        // Count answers
+        $sql_answer = $this->db->select('COUNT(A.username)')
+                               ->from('Answers AS A')
+                               ->where('A.username = U.username');
+        // Count comments
+        $sql_comments = $this->db->select('COUNT(C.username)')
+                                 ->from('Comments AS C')
+                                 ->where('C.username = U.username');
+        
+        // Fetch most active users
+        $sql = '
+            SELECT
+	            U.id, U.username, U.gravatar, U.created,
+	            (
+	                (
+	                    SELECT COUNT(Q.username)
+	                    FROM Questions AS Q
+	                    WHERE Q.username = U.username
+	                ) +
+	                (
+	                    SELECT COUNT(A.username)
+	                    FROM Answers AS A
+	                    WHERE A.username = U.username
+	                ) +
+	                (
+	                    SELECT COUNT(C.username)
+	                    FROM Comments AS C
+	                    WHERE C.username = U.username
+	                )
+	            ) AS total
+            FROM
+	            Users AS U
+            ORDER BY
+	            total DESC
+            LIMIT 3;';
+            
+        $users = $this->db->executeFetchAll($sql);
+        
+        
+        // Prepare som main page presentation.
+        $this->theme->setVariable('main', "
+                       <h2>Välkommen till Allt om Programmering</h2>
+                       <p>Nedan listas de senaste frågorna, populäraste taggarna och mest aktiva användarna.</p>
+                       ");
+        
+        // Dispatch most resent questions
+        $this->dispatcher->forward([
+            'controller' => 'forum',
+            'action' => 'view-all-questions',
+            'params' => [$questions, $tags]
         ]);
+        
+        // Dispatch popular tags
+        $this->dispatcher->forward([
+            'controller' => 'forum',
+            'action' => 'view-all-tags',
+            'params' => [$p_tags]
+        ]);
+        
+        // Dispatch most active users
+        $this->dispatcher->forward([
+            'controller' => 'users',
+            'action' => 'view-all-users',
+            'params' => [$users]
+        ]);
+        
     }
 
 
@@ -59,12 +127,19 @@ class ForumController implements \Anax\DI\IInjectionAware
     /**
      * View all questions
      *
+     * @param 
+     *
      * @return void
      *
      */
-    public function viewAllQuestionsAction() 
+    public function viewAllQuestionsAction($i_questions = null, $i_tags = null) 
     {
-        
+        // Are values supplied from index page method?
+        if (!is_null($i_questions) && !is_null($i_tags)) {
+            $questions = $i_questions;
+            $tags = $i_tags;
+            
+        } else {
         // Fetch all questions from database
         $this->db->select('Q.id, Q.title, Q.username, Q.created')
                  ->from('Questions AS Q')
@@ -79,6 +154,7 @@ class ForumController implements \Anax\DI\IInjectionAware
                  ->join('Questions AS Q', 'Q.id = QT.questions_id')
                  ->execute();
         $tags = $this->db->fetchAll();
+        }
         
         $this->views->add('forum/all-questions', [
             'questions' => $questions,
@@ -165,14 +241,19 @@ class ForumController implements \Anax\DI\IInjectionAware
      * @return void
      *
      */
-    public function viewAllTagsAction() 
+    public function viewAllTagsAction($p_tags = null) 
     {
+        if (!is_null($p_tags)){
+            $tags = $p_tags;
+        
+        } else {
         
         $this->db->select()
                  ->from('Tags')
                  ->orderBy('tag ASC')
                  ->execute();
         $tags = $this->db->fetchAll();
+        }
         
         $this->views->add('forum/all-tags', [
             'tags' => $tags,

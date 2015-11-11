@@ -1,5 +1,3 @@
-<h1><?=$title?></h1>
-
 <table>
 <?php foreach ($users as $user) : ?>
     <tr>
