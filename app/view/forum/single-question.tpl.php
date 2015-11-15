@@ -4,11 +4,11 @@
 <p>
     Taggar: <?php 
                 foreach ($tags as $tag) {
-                    echo $tag->tag_name . " ";
+                    echo "<a href='" . $this->url->create('forum/view-tag/' . $tag->tag_id) . "'>" . $tag->tag_name . "</a> ";
                 } 
             ?>
     <br>
-    Skapad: <?=$question->created?>
+    av <?=$question->username?> &raquo <?=$question->created?>
 </p>
 
 
@@ -17,7 +17,7 @@
     if (isset($q_comments) && !empty($q_comments)) {
         $html = "<ul>";
         foreach ($q_comments as $comment) {
-            $html .= "<li>" . $comment->text . "<br> - " . $comment->username . " (" . $comment->created . ")</li>";
+            $html .= "<li>" . $comment->text . "<br>av " . $comment->username . " &raquo" . $comment->created . "</li>";
         }
         $html .= "</ul>";
         

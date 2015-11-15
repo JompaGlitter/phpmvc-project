@@ -6,7 +6,7 @@ namespace Idun\HTMLForm;
  * Anax base class for wrapping sessions.
  *
  */
-class FormAddComment extends \Mos\HTMLForm\CForm
+class FormAddPost extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionaware,
         \Anax\MVC\TRedirectHelpers;
@@ -16,45 +16,29 @@ class FormAddComment extends \Mos\HTMLForm\CForm
      * Constructor
      *
      */
-    public function __construct($pagekey, $ip)
+    public function __construct($username)
     {
         parent::__construct([], [
-            'pagekey' => [
+            'username' => [
                 'type'        => 'hidden',
-                'value'       => $pagekey,
+                'value'       => $username,
             ],
-
-            'ip' => [
-                'type'        => 'hidden',
-                'value'       => $ip,
+            'title' => [
+                'type'        => 'text',
+                'label'       => 'Titel:',
+                'required'    => true,
+                'validation'  => ['not_empty'],
             ],
-
-            'content' => [
+            'text' => [
                 'type'        => 'textarea',
                 'label'       => 'Lägg till en kommentar:',
                 'required'    => true,
                 'validation'  => ['not_empty'],
                 //'class'       => 'commentContent'
             ],
-            'name' => [
-                'type'        => 'text',
-                'label'       => 'Namn:',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-            ],
-            'web' => [
-                'type'        => 'url',
-                'label'       => 'Hemsida:',
-                //'validation'  => ['not_empty'],
-            ],
-            'email' => [
-                'type'        => 'email',
-                'label'       => 'Email:',
-                //'validation'  => ['not_empty', 'email_adress'],
-            ],
             'submit' => [
                 'type'      => 'submit',
-                'value'     => 'Spara',
+                'value'     => 'Skapa',
                 'callback'  => [$this, 'callbackSubmit'],
                 //'class'     => 'commentButtons'
             ],
@@ -92,21 +76,18 @@ class FormAddComment extends \Mos\HTMLForm\CForm
         //$this->AddOutput("<p><b>Email: " . $this->Value('email') . "</b></p>");
         //$this->AddOutput("<p><b>Phone: " . $this->Value('phone') . "</b></p>");
 
-        $this->comment = new \Idun\Comment\Comment();
-        $this->comment->setDI($this->di);
+        $this->questions = new \Idun\Questions\Questions();
+        $this->questions->setDI($this->di);
         
         date_default_timezone_set('Europe/Berlin');
         $now = date('Y-m-d H:i:s');
         //$ip = $this->request->getServer('REMOTE_ADDR');
         
-        $save = $this->comment->save([
-            'pagekey' => $this->Value('pagekey'),
-            'content' => $this->Value('content'),
-            'name' => $this->Value('name'),
-            'web' => $this->Value('web'),
-            'email' => $this->Value('email'),
-            'timestamp' => $now,
-            'ip' => $this->Value('ip'),
+        $save = $this->questions->save([
+            'username' => $this->Value('username'),
+            'title' => $this->Value('title'),
+            'text' => $this->Value('text'),
+            'created' => $now,
         ]);
 
         return $save ? true : false;
@@ -120,7 +101,9 @@ class FormAddComment extends \Mos\HTMLForm\CForm
     public function callbackSuccess()
     {
         $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>");
-        $this->redirectTo();
+        
+        $url = 'questions';
+        $this->redirectTo($url);
 
     }
 

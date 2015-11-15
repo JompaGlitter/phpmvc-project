@@ -6,7 +6,7 @@ namespace Idun\Users;
  * Model for Users.
  *
  */
-class User extends \Idun\MVC\CDatabaseModel
+class Users extends \Idun\MVC\CDatabaseModel
 {
     
     

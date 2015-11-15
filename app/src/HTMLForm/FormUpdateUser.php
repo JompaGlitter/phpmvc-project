@@ -17,7 +17,7 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
          * Constructor
          *
          */
-        public function __construct($id, $acronym, $name, $email)
+        public function __construct($id, $username, $about, $email, $url)
         {
             parent::__construct([], [
                 'id' => [
@@ -26,25 +26,33 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
                     'required'    => true,
                     'validation'  => ['not_empty'],
                 ],
-                'acronym' => [
+                'username' => [
                     'type'        => 'text',
-                    'label'       => 'Din akronym:',
-                    'value'       => $acronym,
+                    'label'       => 'Användarnamn:',
+                    'value'       => $username,
                     'required'    => true,
                     'validation'  => ['not_empty'],
                 ],
-                'name' => [
-                    'type'        => 'text',
-                    'label'       => 'Ditt namn:',
-                    'value'       => $name,
+                'about' => [
+                    'type'        => 'textarea',
+                    'label'       => 'Kort beskrivning:',
+                    'value'       => $about,
                     'required'    => true,
                     'validation'  => ['not_empty'],
                 ],
                 'email' => [
-                    'type'        => 'text',
+                    'type'        => 'email',
+                    'label'       => 'Email:',
                     'value'       => $email,
                     'required'    => true,
                     'validation'  => ['not_empty', 'email_adress'],
+                ],
+                'url' => [
+                    'type'        => 'url',
+                    'label'       => 'Hemsida:',
+                    'value'       => $url,
+                    'required'    => true,
+                    'validation'  => ['not_empty'],
                 ],
                 'submit' => [
                     'type'      => 'submit',
@@ -84,7 +92,7 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
             //$this->AddOutput("<p><b>Email: " . $this->Value('email') . "</b></p>");
             //$this->AddOutput("<p><b>Phone: " . $this->Value('phone') . "</b></p>");
 
-            $this->users = new \Idun\Users\User();
+            $this->users = new \Idun\Users\Users();
             $this->users->setDI($this->di);
             
             date_default_timezone_set('Europe/Berlin');
@@ -92,10 +100,12 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
             
             $save = $this->users->save([
                 'id'  => $this->Value('id'),
-                'acronym' => $this->Value('acronym'),
+                'username' => $this->Value('username'),
+                'about' => $this->Value('about'),
                 'email' => $this->Value('email'),
-                'name' => $this->Value('name'),
-                'password' => password_hash($this->Value('acronym'), PASSWORD_DEFAULT),
+                'homepage' => $this->Value('url'),
+                //'password' => password_hash($this->Value('acronym'), PASSWORD_DEFAULT),
+                'gravatar' => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))),
                 'updated' => $now,
             ]);
 

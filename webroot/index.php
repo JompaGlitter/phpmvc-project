@@ -117,10 +117,10 @@ $app->router->add('ask', function() use ($app) {
     $app->theme->setTitle("Skapa ny fråga");
     
     // Prepare some page presentation.
-    $app->theme->setVariable('main', "
-                   <h2>Skapa ny fråga</h2>
-                   <p>Snart kan du ställa nya frågor på sidan.</p>
-                   ");
+    $app->dispatcher->forward([
+        'controller'    => 'forum',
+        'action'        => 'add-question'
+    ]);
     
 });
 

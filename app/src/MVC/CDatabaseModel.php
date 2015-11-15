@@ -95,7 +95,8 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
      */
     public function getSource()
     {
-        return strtolower(implode('', array_slice(explode('\\', get_class($this)), -1)));
+        //return strtolower(implode('', array_slice(explode('\\', get_class($this)), -1)));
+        return implode('', array_slice(explode('\\', get_class($this)), -1));
     }
     
     

@@ -24,8 +24,9 @@ class ForumController implements \Anax\DI\IInjectionAware
     {
         
         // Fetch resent questions
-        $this->db->select('Q.id, Q.title, Q.username, Q.created')
+        $this->db->select('Q.id, Q.title, Q.username, Q.created, U.id AS user_id')
                  ->from('Questions AS Q')
+                 ->join('Users AS U', 'U.username = Q.username')
                  ->orderBy('created ASC')
                  ->limit(3)
                  ->execute();
@@ -48,20 +49,6 @@ class ForumController implements \Anax\DI\IInjectionAware
                  ->limit(3)
                  ->execute();
         $p_tags = $this->db->fetchAll();
-        
-        
-        // Count questions
-        $sql_question = $this->db->select('COUNT(Q.username)')
-                                 ->from('Questions AS Q')
-                                 ->where('Q.username = U.username');
-        // Count answers
-        $sql_answer = $this->db->select('COUNT(A.username)')
-                               ->from('Answers AS A')
-                               ->where('A.username = U.username');
-        // Count comments
-        $sql_comments = $this->db->select('COUNT(C.username)')
-                                 ->from('Comments AS C')
-                                 ->where('C.username = U.username');
         
         // Fetch most active users
         $sql = '
@@ -140,20 +127,21 @@ class ForumController implements \Anax\DI\IInjectionAware
             $tags = $i_tags;
             
         } else {
-        // Fetch all questions from database
-        $this->db->select('Q.id, Q.title, Q.username, Q.created')
-                 ->from('Questions AS Q')
-                 ->orderBy('created ASC')
-                 ->execute();
-        $questions = $this->db->fetchAll();
+            // Fetch all questions from database
+            $this->db->select('Q.id, Q.title, Q.username, Q.created, U.id AS user_id')
+                     ->from('Questions AS Q')
+                     ->join('Users AS U','U.username = Q.username')
+                     ->orderBy('created ASC')
+                     ->execute();
+            $questions = $this->db->fetchAll();
         
-        // Fetch all question related tags from database
-        $this->db->select('T.*, Q.id AS question_id')
-                 ->from('Tags AS T')
-                 ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
-                 ->join('Questions AS Q', 'Q.id = QT.questions_id')
-                 ->execute();
-        $tags = $this->db->fetchAll();
+            // Fetch all question related tags from database
+            $this->db->select('T.*, Q.id AS question_id')
+                     ->from('Tags AS T')
+                     ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
+                     ->join('Questions AS Q', 'Q.id = QT.questions_id')
+                     ->execute();
+            $tags = $this->db->fetchAll();
         }
         
         $this->views->add('forum/all-questions', [
@@ -184,7 +172,7 @@ class ForumController implements \Anax\DI\IInjectionAware
         $question = $this->db->fetchOne();
         
         // Fetch related tags
-        $this->db->select('T.tag AS tag_name')
+        $this->db->select('T.tag AS tag_name, T.id AS tag_id')
                  ->from('Tags AS T')
                  ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
                  ->join('Questions AS Q', 'Q.id = QT.questions_id')
@@ -305,6 +293,26 @@ class ForumController implements \Anax\DI\IInjectionAware
             'tag' => $tag,
             'questions' => $questions,
             'q_tags' => $q_tags,
+        ]);
+        
+    }
+    
+    /**
+     * Post new question
+     *
+     * @return void
+     */
+    public function addQuestionAction($username = 'JompaGlitter')
+    {
+        
+        $form = new \Idun\HTMLForm\FormAddPost($username);
+        $form->setDI($this->di);
+        $form->check();
+
+        $this->theme->setTitle("Ställ ny fråga");
+        $this->views->add('default/page', [
+            'title' => "Skapa ny fråga",
+            'content' => $form->getHTML()
         ]);
         
     }

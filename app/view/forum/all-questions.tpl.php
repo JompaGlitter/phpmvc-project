@@ -16,7 +16,7 @@
         <br>
         
         <!-- Creator and creation date-->
-        <i>av <?=$question->username?> &raquo <?=$question->created?></i>
+        <i>av <a href="<?=$this->url->create('users/id/' . $question->user_id)?>"><?=$question->username?></a> &raquo <?=$question->created?></i>
         </small>
     </p>
 <?php endforeach; ?>

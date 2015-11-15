@@ -19,22 +19,33 @@ class FormAddUser extends \Mos\HTMLForm\CForm
     public function __construct()
     {
         parent::__construct([], [
-            'acronym' => [
+            'username' => [
                 'type'        => 'text',
-                'label'       => 'Din akronym:',
+                'label'       => 'Användarnamn:',
+                'placeholder' => 't.ex. Lyxglidaren',
                 'required'    => true,
                 'validation'  => ['not_empty'],
             ],
-            'name' => [
-                'type'        => 'text',
-                'label'       => 'Ditt namn:',
+            'about' => [
+                'type'        => 'textarea',
+                'label'       => 'Kort beskrivning:',
+                'placeholder' => 't.ex. Värsta grymma grabben/bruden/hen/djuret helt enkelt!',
                 'required'    => true,
                 'validation'  => ['not_empty'],
             ],
             'email' => [
                 'type'        => 'email',
+                'label'       => 'Email:',
+                'placeholder' => 'email@example.com',
                 'required'    => true,
                 'validation'  => ['not_empty', 'email_adress'],
+            ],
+            'url' => [
+                'type'        => 'url',
+                'label'       => 'Hemsida:',
+                'placeholder' => 'http://www.example.com',
+                'required'    => true,
+                'validation'  => ['not_empty'],
             ],
             'submit' => [
                 'type'      => 'submit',
@@ -72,22 +83,22 @@ class FormAddUser extends \Mos\HTMLForm\CForm
         //$this->AddOutput("<p><b>Name: " . $this->Value('name') . "</b></p>");
         //$this->AddOutput("<p><b>Email: " . $this->Value('email') . "</b></p>");
         //$this->AddOutput("<p><b>Phone: " . $this->Value('phone') . "</b></p>");
-
-        $this->users = new \Idun\Users\User();
+        
+        $this->users = new \Idun\Users\Users();
         $this->users->setDI($this->di);
         
         date_default_timezone_set('Europe/Berlin');
         $now = date('Y-m-d H:i:s');
         
         $save = $this->users->save([
-            'acronym' => $this->Value('acronym'),
+            'username' => $this->Value('username'),
+            'about' => $this->Value('about'),
             'email' => $this->Value('email'),
-            'name' => $this->Value('name'),
-            'password' => password_hash($this->Value('acronym'), PASSWORD_DEFAULT),
+            'homepage' => $this->Value('url'),
+            //'password' => password_hash($this->Value('acronym'), PASSWORD_DEFAULT),
+            'gravatar' => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))),
             'created' => $now,
-            'active' => $now,
             ]);
-            
         return $save ? true : false; 
     }
 
