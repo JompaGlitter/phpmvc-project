@@ -165,9 +165,10 @@ class ForumController implements \Anax\DI\IInjectionAware
     {
         
         // Fetch question content
-        $this->db->select()
-                 ->from('Questions')
-                 ->where('id = ' . $id)
+        $this->db->select('Q.*, U.id AS user_id')
+                 ->from('Questions AS Q')
+                 ->join('Users AS U', 'U.username = Q.username')
+                 ->where('Q.id = ' . $id)
                  ->execute();
         $question = $this->db->fetchOne();
         
@@ -181,17 +182,19 @@ class ForumController implements \Anax\DI\IInjectionAware
         $tags = $this->db->fetchAll();
         
         // Fetch comments related to question
-        $this->db->select('C.username, C.text, C.created')
+        $this->db->select('C.username, C.text, C.created, U.id AS user_id')
                  ->from('Comments AS C')
                  ->join('Questions AS Q', 'Q.id = C.question_id')
+                 ->join('Users AS U', 'U.username = C.username')
                  ->where('Q.id = ' . $id)
                  ->orderBy('created ASC')
                  ->execute();
         $q_comments = $this->db->fetchAll();
         
         // Fetch answers related to question
-        $this->db->select('A.id, A.username, A.text, A.created')
+        $this->db->select('A.id, A.username, A.text, A.created, U.id AS user_id')
                  ->from('Answers AS A')
+                 ->join('Users AS U', 'U.username = A.username')
                  ->join('Questions AS Q', 'Q.id = A.question_id')
                  ->where('Q.id = ' . $id)
                  ->orderBy('created ASC')
@@ -199,10 +202,11 @@ class ForumController implements \Anax\DI\IInjectionAware
         $answers = $this->db->fetchAll();
         
         // Fetch comments related to answers
-        $this->db->select('C.answer_id, C.username, C.text, C.created')
+        $this->db->select('C.answer_id, C.username, C.text, C.created, U.id AS user_id')
                  ->from('Comments AS C')
                  ->join('Answers AS A', 'A.id = C.answer_id')
                  ->join('Questions AS Q', 'Q.id = A.question_id')
+                 ->join('Users AS U', 'U.username = C.username')
                  ->where('Q.id = ' . $id)
                  ->orderBy('created ASC')
                  ->execute();
@@ -297,19 +301,23 @@ class ForumController implements \Anax\DI\IInjectionAware
         
     }
     
+    
+    
     /**
-     * Post new question
+     * Add new question
      *
      * @return void
      */
-    public function addQuestionAction($username = 'JompaGlitter')
+    public function addQuestionAction()
     {
         
-        $form = new \Idun\HTMLForm\FormAddPost($username);
+        $username = 'JompaGlitter';
+        
+        $form = new \Idun\HTMLForm\FormAddQuestion($username);
         $form->setDI($this->di);
         $form->check();
 
-        $this->theme->setTitle("Ställ ny fråga");
+        $this->theme->setTitle("Skapa ny fråga");
         $this->views->add('default/page', [
             'title' => "Skapa ny fråga",
             'content' => $form->getHTML()
@@ -317,6 +325,148 @@ class ForumController implements \Anax\DI\IInjectionAware
         
     }
     
+    
+    
+    /**
+     * Add answer to a question
+     *
+     * @param int $id, id of question
+     *
+     * @return void
+     */
+    public function addAnswerAction($id)
+    {
+        /*
+         * Display answer form
+         */
+        
+        $username = 'JompaGlitter';
+        
+        $form = new \Idun\HTMLForm\FormAddAnswer($username, $id);
+        $form->setDI($this->di);
+        $form->check();
+        
+        $this->theme->setTitle('Svara på fråga');
+        $this->views->add('default/page', [
+            'title' => 'Svara på fråga',
+            'content' => $form->getHTML()
+        ]);
+        
+        
+        /*
+         * Display question
+         */
+        
+        // Fetch question content
+        $this->db->select('Q.*, U.id AS user_id')
+                 ->from('Questions AS Q')
+                 ->join('Users AS U', 'U.username = Q.username')
+                 ->where('Q.id = ' . $id)
+                 ->execute();
+        $question = $this->db->fetchOne();
+        
+        // Fetch related tags
+        $this->db->select('T.tag AS tag_name, T.id AS tag_id')
+                 ->from('Tags AS T')
+                 ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
+                 ->join('Questions AS Q', 'Q.id = QT.questions_id')
+                 ->where('Q.id = ' . $id)
+                 ->execute();
+        $tags = $this->db->fetchAll();
+        
+        $this->views->add('forum/answer-question', [
+            'question' => $question,
+            'tags' => $tags
+        ]);
+        
+    }
+    
+    
+    
+    /**
+     * Add comment on a question
+     *
+     * @param int $id, id of the question
+     *
+     * @return void
+    */
+    public function addQuestionCommentAction($id)
+    {
+        
+        $username = 'JompaGlitter';
+        
+        $form = new \Idun\HTMLForm\FormAddQuestionComment($username, $id);
+        $form->setDI($this->di);
+        $form->check();
+        
+        $this->theme->setTitle('Kommentera på frågan');
+        $this->views->add('default/page', [
+            'title' => 'Kommentera på frågan',
+            'content' => $form->getHTML()
+        ]);
+            
+        
+        /*
+         * Display question
+         */
+        
+        // Fetch question content
+        $this->db->select('Q.*, U.id AS user_id')
+                 ->from('Questions AS Q')
+                 ->join('Users AS U', 'U.username = Q.username')
+                 ->where('Q.id = ' . $id)
+                 ->execute();
+        $question = $this->db->fetchOne();
+        
+        // Fetch related tags
+        $this->db->select('T.tag AS tag_name, T.id AS tag_id')
+                 ->from('Tags AS T')
+                 ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
+                 ->join('Questions AS Q', 'Q.id = QT.questions_id')
+                 ->where('Q.id = ' . $id)
+                 ->execute();
+        $tags = $this->db->fetchAll();
+        
+        $this->views->add('forum/answer-question', [
+            'question' => $question,
+            'tags' => $tags
+        ]);
+        
+    }
+    
+    
+    
+    /**
+     * Add comment on an answer
+     *
+     * @param int $id, id of the answer to comment on
+     *
+     * @return void
+     */
+    public function addAnswerCommentAction($id)
+    {
+        
+        $username = 'JompaGlitter';
+        
+        // Fetcher id of question for redirection purpose
+        $this->db->select('Q.id')
+                 ->from('Questions AS Q')
+                 ->join('Answers AS A', 'A.question_id = Q.id')
+                 ->where('A.id = ' . $id)
+                 ->execute();
+        $question = $this->db->fetchOne();
+        
+        $form = new \Idun\HTMLForm\FormAddAnswerComment($username, $id, $question->id);
+        $form->setDI($this->di);
+        $form->check();
+        
+        $this->theme->setTitle('Kommentera på svaret');
+        $this->views->add('default/page', [
+            'title' => 'Kommentera på svaret',
+            'content' => $form->getHTML()
+        ]);
+        
+    }
     
 
 }

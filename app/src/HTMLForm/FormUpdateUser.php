@@ -14,11 +14,23 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
 
 
         /**
+         * Properties
+         */
+        private $user_id; // id of the user
+        
+
+
+        /**
          * Constructor
          *
          */
         public function __construct($id, $username, $about, $email, $url)
         {
+            // Set params
+            $this->user_id = $id;
+            
+            
+            // Construct the form
             parent::__construct([], [
                 'id' => [
                     'type'  => 'hidden',
@@ -133,7 +145,7 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
         public function callbackSuccess()
         {
             $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>");
-            $url = 'users';
+            $url = 'users/id/' . $this->user_id;
             $this->redirectTo($url);
 
         }

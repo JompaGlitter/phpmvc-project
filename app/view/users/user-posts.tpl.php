@@ -39,10 +39,12 @@
 
 <?php else : ?>
     <?php foreach ($answers as $answer) : ?>
-    <!-- Title -->
-    <strong><a href="<?=$this->url->create('forum/view-question/' . $answer->question_id)?>"><?=$answer->question_title?></a></strong><br>
-    <!-- Creation date -->
-    <small><i>Svarat &raquo <?=$answer->answer_created?></i></small>
+    <p>
+        <!-- Title -->
+        <strong><a href="<?=$this->url->create('forum/view-question/' . $answer->question_id)?>"><?=$answer->question_title?></a></strong><br>
+        <!-- Creation date -->
+        <small><i>Svarat &raquo <?=$answer->answer_created?></i></small>
+    </p>
     <?php endforeach; ?>
 <?php endif; ?>
 

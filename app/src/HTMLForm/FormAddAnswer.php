@@ -6,39 +6,48 @@ namespace Idun\HTMLForm;
  * Anax base class for wrapping sessions.
  *
  */
-class FormAddPost extends \Mos\HTMLForm\CForm
+class FormAddAnswer extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionaware,
         \Anax\MVC\TRedirectHelpers;
 
 
     /**
+     * Properties
+     *
+     */
+    private $question_id; // id of the answered question
+        
+
+    /**
      * Constructor
      *
      */
-    public function __construct($username)
+    public function __construct($username, $id)
     {
+        // Set params
+        $this->question_id = $id;
+        
+        
         parent::__construct([], [
+            'question' => [
+                'type'        => 'hidden',
+                'value'       => $id
+            ],
             'username' => [
                 'type'        => 'hidden',
                 'value'       => $username,
             ],
-            'title' => [
-                'type'        => 'text',
-                'label'       => 'Titel:',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-            ],
             'text' => [
                 'type'        => 'textarea',
-                'label'       => 'Lägg till en kommentar:',
+                'label'       => 'Svar:',
                 'required'    => true,
                 'validation'  => ['not_empty'],
                 //'class'       => 'commentContent'
             ],
             'submit' => [
                 'type'      => 'submit',
-                'value'     => 'Skapa',
+                'value'     => 'Svara',
                 'callback'  => [$this, 'callbackSubmit'],
                 //'class'     => 'commentButtons'
             ],
@@ -76,16 +85,16 @@ class FormAddPost extends \Mos\HTMLForm\CForm
         //$this->AddOutput("<p><b>Email: " . $this->Value('email') . "</b></p>");
         //$this->AddOutput("<p><b>Phone: " . $this->Value('phone') . "</b></p>");
 
-        $this->questions = new \Idun\Questions\Questions();
-        $this->questions->setDI($this->di);
+        $this->answers = new \Idun\Answers\Answers();
+        $this->answers->setDI($this->di);
         
         date_default_timezone_set('Europe/Berlin');
         $now = date('Y-m-d H:i:s');
         //$ip = $this->request->getServer('REMOTE_ADDR');
         
-        $save = $this->questions->save([
+        $save = $this->answers->save([
+            'question_id' => $this->Value('question'),
             'username' => $this->Value('username'),
-            'title' => $this->Value('title'),
             'text' => $this->Value('text'),
             'created' => $now,
         ]);
@@ -102,7 +111,7 @@ class FormAddPost extends \Mos\HTMLForm\CForm
     {
         $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>");
         
-        $url = 'questions';
+        $url = 'forum/view-question/' . $this->question_id;
         $this->redirectTo($url);
 
     }

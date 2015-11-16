@@ -8,7 +8,7 @@
                 } 
             ?>
     <br>
-    av <?=$question->username?> &raquo <?=$question->created?>
+    av <a href="<?=$this->url->create('users/id/' . $question->user_id)?>"><?=$question->username?></a> &raquo <?=$question->created?>
 </p>
 
 
@@ -17,41 +17,45 @@
     if (isset($q_comments) && !empty($q_comments)) {
         $html = "<ul>";
         foreach ($q_comments as $comment) {
-            $html .= "<li>" . $comment->text . "<br>av " . $comment->username . " &raquo" . $comment->created . "</li>";
+            $html .= "<li>" . $comment->text . "<br> - <a href='" . $this->url->create('users/id/' . $comment->user_id) . "'>" . $comment->username . "</a> &raquo " . $comment->created . "</li>";
         }
         $html .= "</ul>";
         
         echo $html;
     }
 ?>
-<a href="<?=$this->url->create('forum/add-comment/' . $question->id)?>">Skriv kommentar</a>
+<p><a href="<?=$this->url->create('forum/add-question-comment/' . $question->id)?>">Kommentera frågan</a></p>
 
 
 <!-- Answers related to question, if present -->
-<h3>Svar:</h3>
+<strong>Svar:</strong> (<?=count($answers)?>)
+<hr>
 <?php
     if (isset($answers) && !empty($answers)) {
         $html = "<ul>";
         foreach ($answers as $answer) {
-            $html .= "<li>" . $answer->text . "<br> - " . $answer->username . " (" . $answer->created . ")</li>";
+            $html .= "<li>" . $answer->text . "<br> - <a href='" . $this->url->create('users/id/' . $answer->user_id) . "'>" . $answer->username . "</a> &raquo " . $answer->created . "</li>";
             
             /* 
              * Comments related to answer, if present
              */
+            $html .= "<ul>";
             if (isset($a_comments) && !empty($a_comments)) {
-                $html .= "<ul>";
                 foreach ($a_comments as $comment) {
                     if ($comment->answer_id == $answer->id) {
-                        $html .= "<li>" . $comment->text . "<br> - " . $comment->username . " (" . $comment->created . ")</li>";
+                        $html .= "<li>" . $comment->text . "<br> - <a href='" . $this->url->create('users/id/' . $comment->user_id) . "'>" . $comment->username . "</a> &raquo " . $comment->created . "</li>";
                     }
                 }
-                $html .= "<li><a href='" . $this->url->create('forum/add-comment/' . $answer->id) . "'>Skriv kommentar</a></li>";
-                $html .= "</ul>";
             }
+            $html .= "<li><a href='" . $this->url->create('forum/add-answer-comment/' . $answer->id) . "'>Kommentera svaret</a></li>";
+            $html .= "</ul>";
         }
         $html .= "</ul>";
         
         echo $html;
+    
+    } else {
+        echo "<p>Denna fråga har ej besvarats än.</p>";
     }
 ?>
 <a href="<?=$this->url->create('forum/add-answer/' . $question->id)?>">Svara på frågan</a>   
