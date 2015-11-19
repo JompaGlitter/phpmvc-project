@@ -77,7 +77,7 @@ $app->router->add('tags', function() use ($app) {
     // Prepare some page presentation.
     $app->theme->setVariable('main', "
                    <h2>Taggar</h2>
-                   <p>Här visas alla taggar som en fråga kan ha.</p>
+                   <p>Här visas alla taggar som en fråga kan ha och hur många frågor som har taggen.</p>
                    ");
     
     // Dispatcher for all tags view
@@ -131,11 +131,11 @@ $app->router->add('login', function() use ($app) {
 
     $app->theme->setTitle('Logga in');
     
-    // Prepare some page presentation.
-    $app->theme->setVariable('main', "
-                   <h2>Logga in</h2>
-                   <p>Här kan du snart logga in.</p>
-                   ");
+    // Forward to login form.
+    $app->dispatcher->forward([
+        'controller'    => 'users',
+        'action'        => 'login'
+    ]);
     
 });
 

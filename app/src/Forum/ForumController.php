@@ -27,7 +27,7 @@ class ForumController implements \Anax\DI\IInjectionAware
         $this->db->select('Q.id, Q.title, Q.username, Q.created, U.id AS user_id')
                  ->from('Questions AS Q')
                  ->join('Users AS U', 'U.username = Q.username')
-                 ->orderBy('created ASC')
+                 ->orderBy('created DESC')
                  ->limit(3)
                  ->execute();
         $questions = $this->db->fetchAll();
@@ -41,7 +41,7 @@ class ForumController implements \Anax\DI\IInjectionAware
         $tags = $this->db->fetchAll();
         
         // Fetch popular tags
-        $this->db->select('T.*, COUNT(QT.tags_id) AS CountOf')
+        $this->db->select('T.*, COUNT(QT.tags_id) AS countOf')
                  ->from('Tags AS T')
                  ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
                  ->groupBy('tag')
@@ -131,7 +131,7 @@ class ForumController implements \Anax\DI\IInjectionAware
             $this->db->select('Q.id, Q.title, Q.username, Q.created, U.id AS user_id')
                      ->from('Questions AS Q')
                      ->join('Users AS U','U.username = Q.username')
-                     ->orderBy('created ASC')
+                     ->orderBy('created DESC')
                      ->execute();
             $questions = $this->db->fetchAll();
         
@@ -240,9 +240,11 @@ class ForumController implements \Anax\DI\IInjectionAware
         
         } else {
         
-        $this->db->select()
-                 ->from('Tags')
-                 ->orderBy('tag ASC')
+        $this->db->select('T.*, count(QT.tags_id) AS countOf')
+                 ->from('Tags AS T')
+                 ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
+                 ->groupBy('T.tag')
+                 ->orderBy('T.tag ASC')
                  ->execute();
         $tags = $this->db->fetchAll();
         }
@@ -310,18 +312,38 @@ class ForumController implements \Anax\DI\IInjectionAware
      */
     public function addQuestionAction()
     {
+        // Is user logged in?
+        if ($this->session->has('username')) {
         
-        $username = 'JompaGlitter';
-        
-        $form = new \Idun\HTMLForm\FormAddQuestion($username);
-        $form->setDI($this->di);
-        $form->check();
+            // Get username from session
+            $username = $this->session->get('username');
+            
+            // Fetch existing tags from database
+            $this->db->select('T.*, count(QT.tags_id) AS countOf')
+                     ->from('Tags AS T')
+                     ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
+                     ->groupBy('T.tag')
+                     ->orderBy('T.tag ASC')
+                     ->execute();
+            $dbTags = $this->db->fetchAll();
+            
+            // Create question form
+            $form = new \Idun\HTMLForm\FormAddQuestion($username, $dbTags);
+            $form->setDI($this->di);
+            $form->check();
 
-        $this->theme->setTitle("Skapa ny fråga");
-        $this->views->add('default/page', [
-            'title' => "Skapa ny fråga",
-            'content' => $form->getHTML()
+            $this->theme->setTitle("Skapa ny fråga");
+            $this->views->add('default/page', [
+                'title' => "Skapa ny fråga",
+                'content' => $form->getHTML()
         ]);
+        
+        } else {
+            
+            // Redirect to login page
+            $url = $this->url->create('login');
+            header("Location: $url");
+        }
         
     }
     
@@ -336,48 +358,56 @@ class ForumController implements \Anax\DI\IInjectionAware
      */
     public function addAnswerAction($id)
     {
-        /*
-         * Display answer form
-         */
+        // Is user logged in?
+        if ($this->session->has('username')) {
         
-        $username = 'JompaGlitter';
+            // Get username from session
+            $username = $this->session->get('username');
+            
+            // Create answer form
+            $form = new \Idun\HTMLForm\FormAddAnswer($username, $id);
+            $form->setDI($this->di);
+            $form->check();
         
-        $form = new \Idun\HTMLForm\FormAddAnswer($username, $id);
-        $form->setDI($this->di);
-        $form->check();
-        
-        $this->theme->setTitle('Svara på fråga');
-        $this->views->add('default/page', [
-            'title' => 'Svara på fråga',
-            'content' => $form->getHTML()
-        ]);
+            $this->theme->setTitle('Svara på fråga');
+            $this->views->add('default/page', [
+                'title' => 'Svara på fråga',
+                'content' => $form->getHTML()
+            ]);
         
         
-        /*
-         * Display question
-         */
+            /*
+             * Display question
+             */
         
-        // Fetch question content
-        $this->db->select('Q.*, U.id AS user_id')
-                 ->from('Questions AS Q')
-                 ->join('Users AS U', 'U.username = Q.username')
-                 ->where('Q.id = ' . $id)
-                 ->execute();
-        $question = $this->db->fetchOne();
+            // Fetch question content
+            $this->db->select('Q.*, U.id AS user_id')
+                     ->from('Questions AS Q')
+                     ->join('Users AS U', 'U.username = Q.username')
+                     ->where('Q.id = ' . $id)
+                     ->execute();
+            $question = $this->db->fetchOne();
         
-        // Fetch related tags
-        $this->db->select('T.tag AS tag_name, T.id AS tag_id')
-                 ->from('Tags AS T')
-                 ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
-                 ->join('Questions AS Q', 'Q.id = QT.questions_id')
-                 ->where('Q.id = ' . $id)
-                 ->execute();
-        $tags = $this->db->fetchAll();
+            // Fetch related tags
+            $this->db->select('T.tag AS tag_name, T.id AS tag_id')
+                     ->from('Tags AS T')
+                     ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
+                     ->join('Questions AS Q', 'Q.id = QT.questions_id')
+                     ->where('Q.id = ' . $id)
+                     ->execute();
+            $tags = $this->db->fetchAll();
         
-        $this->views->add('forum/answer-question', [
-            'question' => $question,
-            'tags' => $tags
-        ]);
+            $this->views->add('forum/answer-question', [
+                'question' => $question,
+                'tags' => $tags
+            ]);
+        
+        } else {
+            
+            // Redirect to login page
+            $url = $this->url->create('login');
+            header("Location: $url");
+        }
         
     }
     
@@ -393,44 +423,56 @@ class ForumController implements \Anax\DI\IInjectionAware
     public function addQuestionCommentAction($id)
     {
         
-        $username = 'JompaGlitter';
+        // Is user logged in?
+        if ($this->session->has('username')) {
         
-        $form = new \Idun\HTMLForm\FormAddQuestionComment($username, $id);
-        $form->setDI($this->di);
-        $form->check();
+            // Get username from session
+            $username = $this->session->get('username');
+            
+            // Create question comment form
+            $form = new \Idun\HTMLForm\FormAddQuestionComment($username, $id);
+            $form->setDI($this->di);
+            $form->check();
         
-        $this->theme->setTitle('Kommentera på frågan');
-        $this->views->add('default/page', [
-            'title' => 'Kommentera på frågan',
-            'content' => $form->getHTML()
-        ]);
+            $this->theme->setTitle('Kommentera på frågan');
+            $this->views->add('default/page', [
+                'title' => 'Kommentera på frågan',
+                'content' => $form->getHTML()
+            ]);
             
         
-        /*
-         * Display question
-         */
+            /*
+             * Display question
+             */
         
-        // Fetch question content
-        $this->db->select('Q.*, U.id AS user_id')
-                 ->from('Questions AS Q')
-                 ->join('Users AS U', 'U.username = Q.username')
-                 ->where('Q.id = ' . $id)
-                 ->execute();
-        $question = $this->db->fetchOne();
+            // Fetch question content
+            $this->db->select('Q.*, U.id AS user_id')
+                     ->from('Questions AS Q')
+                     ->join('Users AS U', 'U.username = Q.username')
+                     ->where('Q.id = ' . $id)
+                     ->execute();
+            $question = $this->db->fetchOne();
         
-        // Fetch related tags
-        $this->db->select('T.tag AS tag_name, T.id AS tag_id')
-                 ->from('Tags AS T')
-                 ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
-                 ->join('Questions AS Q', 'Q.id = QT.questions_id')
-                 ->where('Q.id = ' . $id)
-                 ->execute();
-        $tags = $this->db->fetchAll();
+            // Fetch related tags
+            $this->db->select('T.tag AS tag_name, T.id AS tag_id')
+                     ->from('Tags AS T')
+                     ->join('Questions_Tags AS QT', 'QT.tags_id = T.id')
+                     ->join('Questions AS Q', 'Q.id = QT.questions_id')
+                     ->where('Q.id = ' . $id)
+                     ->execute();
+            $tags = $this->db->fetchAll();
         
-        $this->views->add('forum/answer-question', [
-            'question' => $question,
-            'tags' => $tags
-        ]);
+            $this->views->add('forum/answer-question', [
+                'question' => $question,
+                'tags' => $tags
+            ]);
+        
+        } else {
+            
+            // Redirect to login page
+            $url = $this->url->create('login');
+            header("Location: $url");
+        }
         
     }
     
@@ -446,25 +488,37 @@ class ForumController implements \Anax\DI\IInjectionAware
     public function addAnswerCommentAction($id)
     {
         
-        $username = 'JompaGlitter';
+        // Is user logged in?
+        if ($this->session->has('username')) {
         
-        // Fetcher id of question for redirection purpose
-        $this->db->select('Q.id')
-                 ->from('Questions AS Q')
-                 ->join('Answers AS A', 'A.question_id = Q.id')
-                 ->where('A.id = ' . $id)
-                 ->execute();
-        $question = $this->db->fetchOne();
+            // Get username from session
+            $username = $this->session->get('username');
+            
+            // Fetcher id of question for redirection purpose
+            $this->db->select('Q.id')
+                     ->from('Questions AS Q')
+                     ->join('Answers AS A', 'A.question_id = Q.id')
+                     ->where('A.id = ' . $id)
+                     ->execute();
+            $question = $this->db->fetchOne();
         
-        $form = new \Idun\HTMLForm\FormAddAnswerComment($username, $id, $question->id);
-        $form->setDI($this->di);
-        $form->check();
+            // Create answer comment form
+            $form = new \Idun\HTMLForm\FormAddAnswerComment($username, $id, $question->id);
+            $form->setDI($this->di);
+            $form->check();
         
-        $this->theme->setTitle('Kommentera på svaret');
-        $this->views->add('default/page', [
-            'title' => 'Kommentera på svaret',
-            'content' => $form->getHTML()
-        ]);
+            $this->theme->setTitle('Kommentera på svaret');
+            $this->views->add('default/page', [
+                'title' => 'Kommentera på svaret',
+                'content' => $form->getHTML()
+            ]);
+        
+        } else {
+            
+            // Redirect to login page
+            $url = $this->url->create('login');
+            header("Location: $url");
+        }
         
     }
     

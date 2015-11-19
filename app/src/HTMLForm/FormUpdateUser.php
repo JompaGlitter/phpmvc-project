@@ -38,13 +38,6 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
                     'required'    => true,
                     'validation'  => ['not_empty'],
                 ],
-                'username' => [
-                    'type'        => 'text',
-                    'label'       => 'Användarnamn:',
-                    'value'       => $username,
-                    'required'    => true,
-                    'validation'  => ['not_empty'],
-                ],
                 'about' => [
                     'type'        => 'textarea',
                     'label'       => 'Kort beskrivning:',
@@ -99,10 +92,6 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
          */
         public function callbackSubmit()
         {
-            $this->AddOutput("<p><i>DoSubmit(): Form was submitted. Do stuff (save to database) and return true (success) or false (failed processing form)</i></p>");
-            //$this->AddOutput("<p><b>Name: " . $this->Value('name') . "</b></p>");
-            //$this->AddOutput("<p><b>Email: " . $this->Value('email') . "</b></p>");
-            //$this->AddOutput("<p><b>Phone: " . $this->Value('phone') . "</b></p>");
 
             $this->users = new \Idun\Users\Users();
             $this->users->setDI($this->di);
@@ -112,10 +101,9 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
             
             $save = $this->users->save([
                 'id'  => $this->Value('id'),
-                'username' => $this->Value('username'),
-                'about' => $this->Value('about'),
-                'email' => $this->Value('email'),
-                'homepage' => $this->Value('url'),
+                'about' => strip_tags($this->Value('about')),
+                'email' => strip_tags($this->Value('email')),
+                'homepage' => strip_tags($this->Value('url')),
                 //'password' => password_hash($this->Value('acronym'), PASSWORD_DEFAULT),
                 'gravatar' => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))),
                 'updated' => $now,
@@ -132,7 +120,6 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
          */
         public function callbackSubmitFail()
         {
-            $this->AddOutput("<p><i>DoSubmitFail(): Form was submitted but I failed to process/save/validate it</i></p>");
             return false;
         }
 
@@ -144,7 +131,6 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
          */
         public function callbackSuccess()
         {
-            $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>");
             $url = 'users/id/' . $this->user_id;
             $this->redirectTo($url);
 
@@ -158,7 +144,6 @@ class FormUpdateUser extends \Mos\HTMLForm\CForm
          */
         public function callbackFail()
         {
-            $this->AddOutput("<p><i>Form was submitted and the Check() method returned false.</i></p>");
             $this->redirectTo();
         } 
 

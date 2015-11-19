@@ -1,6 +1,6 @@
 <!-- Question -->
 <h2><?=$question->title?></h2>
-<p><?=$question->text?></p>
+<p><?=$this->textFilter->doFilter($question->text, 'nl2br, markdown')?></p>
 <p>
     Taggar: <?php 
                 foreach ($tags as $tag) {
@@ -17,7 +17,7 @@
     if (isset($q_comments) && !empty($q_comments)) {
         $html = "<ul>";
         foreach ($q_comments as $comment) {
-            $html .= "<li>" . $comment->text . "<br> - <a href='" . $this->url->create('users/id/' . $comment->user_id) . "'>" . $comment->username . "</a> &raquo " . $comment->created . "</li>";
+            $html .= "<li>" . $this->textFilter->doFilter($comment->text, 'nl2br, markdown') . " - <a href='" . $this->url->create('users/id/' . $comment->user_id) . "'>" . $comment->username . "</a> &raquo " . $comment->created . "</li>";
         }
         $html .= "</ul>";
         
@@ -34,7 +34,7 @@
     if (isset($answers) && !empty($answers)) {
         $html = "<ul>";
         foreach ($answers as $answer) {
-            $html .= "<li>" . $answer->text . "<br> - <a href='" . $this->url->create('users/id/' . $answer->user_id) . "'>" . $answer->username . "</a> &raquo " . $answer->created . "</li>";
+            $html .= "<li>" . $this->textFilter->doFilter($answer->text, 'nl2br, markdown') . " - <a href='" . $this->url->create('users/id/' . $answer->user_id) . "'>" . $answer->username . "</a> &raquo " . $answer->created . "</li>";
             
             /* 
              * Comments related to answer, if present
@@ -43,7 +43,7 @@
             if (isset($a_comments) && !empty($a_comments)) {
                 foreach ($a_comments as $comment) {
                     if ($comment->answer_id == $answer->id) {
-                        $html .= "<li>" . $comment->text . "<br> - <a href='" . $this->url->create('users/id/' . $comment->user_id) . "'>" . $comment->username . "</a> &raquo " . $comment->created . "</li>";
+                        $html .= "<li>" . $this->textFilter->doFilter($comment->text, 'nl2br, markdown') . " - <a href='" . $this->url->create('users/id/' . $comment->user_id) . "'>" . $comment->username . "</a> &raquo " . $comment->created . "</li>";
                     }
                 }
             }

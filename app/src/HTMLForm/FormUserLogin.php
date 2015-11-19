@@ -6,7 +6,7 @@ namespace Idun\HTMLForm;
  * Form class to add users to database
  *
  */
-class FormAddUser extends \Mos\HTMLForm\CForm
+class FormUserLogin extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionaware,
         \Anax\MVC\TRedirectHelpers;
@@ -22,40 +22,18 @@ class FormAddUser extends \Mos\HTMLForm\CForm
             'username' => [
                 'type'        => 'text',
                 'label'       => 'Användarnamn:',
-                'placeholder' => 't.ex. Lyxglidaren',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-            ],
-            'email' => [
-                'type'        => 'email',
-                'label'       => 'Email:',
-                'placeholder' => 'email@example.com',
-                'required'    => true,
-                'validation'  => ['not_empty', 'email_adress'],
             ],
             'password' => [
                 'type'        => 'password',
                 'label'       => 'Lösenord',
-                'placeholder' => 'lösenord',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-            ],
-            'about' => [
-                'type'        => 'textarea',
-                'label'       => 'Kort beskrivning:',
-                'placeholder' => 't.ex. Värsta grymma grabben/bruden/hen/djuret helt enkelt!',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-            ],
-            'url' => [
-                'type'        => 'url',
-                'label'       => 'Hemsida:',
-                'placeholder' => 'http://www.example.com',
                 'required'    => true,
                 'validation'  => ['not_empty'],
             ],
             'submit' => [
                 'type'      => 'submit',
+                'value'     => 'Logga in',
                 'callback'  => [$this, 'callbackSubmit'],
             ],
             'submit-reset' => [
@@ -87,27 +65,57 @@ class FormAddUser extends \Mos\HTMLForm\CForm
     public function callbackSubmit()
     {
         
+        // Inject database service into DI
         $this->users = new \Idun\Users\Users();
         $this->users->setDI($this->di);
         
-        // Current time variable
-        date_default_timezone_set('Europe/Berlin');
-        $now = date('Y-m-d H:i:s');
+        /*
+        // Get params from login form
+        $form_username = $this->Value('username');
+        $form_password = $this->Value('password');
         
-        // Password hashing
-        $password = $this->Value('password');
-        $password = password_hash($password, PASSWORD_DEFAULT);
+        // Hash the form password
+        $form_password = password_hash($form_password, PASSWORD_DEFAULT);
         
-        $save = $this->users->save([
-            'username' => $this->Value('username'),
-            'about' => $this['about']['value'],
-            'email' => $this->Value('email'),
-            'homepage' => $this->Value('url'),
-            'password' => $password,
-            'gravatar' => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))),
-            'created' => $now,
-            ]);
-        return $save ? true : false; 
+        // Get params from database
+        $user_values = $this->users->query()
+                                   ->where("username = ?")
+                                   ->execute(array($form_username));
+        
+        $id = implode(array_column($user_values, 'id'));
+        $username = implode(array_column($user_values, 'username'));
+        $password = implode(array_column($user_values, 'password'));
+        $gravatar = implode(array_column($user_values, 'gravatar'));
+        
+        // Do the values match?
+        if ($user_values && $form_password == $password) {
+            
+            // Populate session with user data
+            $this->session->set('user_id', $id);
+            $this->session->set('username', $username);
+            $this->session->set('user_gravatar', $gravatar);
+            
+            return true;
+        
+        } else {
+            
+            return false;
+        }
+        */
+        
+        $saved = $this->users->query()
+                    ->where("username = ?")
+                    ->execute(array($this->Value("username")));
+        
+                if ($saved && password_verify($this->Value("password"), $saved[0]->password)) {
+                    $this->users->session->set('username', $saved[0]->username);
+                    $this->users->session->set('user_id', $saved[0]->id);
+                    $this->users->session->set('user_gravatar', $saved[0]->gravatar);
+                    return true;    
+                } else {
+                    return false;    
+                }  
+        
     }
 
 
@@ -131,7 +139,7 @@ class FormAddUser extends \Mos\HTMLForm\CForm
     {
 
         //$url = 'users/id/' . $this->Value('id');
-        $url = 'login';
+        $url = '';
         $this->redirectTo($url);
 
     }

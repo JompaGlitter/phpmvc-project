@@ -29,7 +29,7 @@ class UsersController implements \Anax\DI\IInjectionAware
                  ->execute();
         
         $users = $this->db->fetchAll();
-        }
+        } 
         
         $this->views->add('users/list-all', [
             'users' => $users,
@@ -48,19 +48,29 @@ class UsersController implements \Anax\DI\IInjectionAware
      */
     public function idAction($id = null)
     {
+        // Fetch user details from database
         $this->db->select()
                  ->from('Users AS U')
                  ->where('U.id = ' . $id)
                  ->execute();
         $user = $this->db->fetchOne();
- 
-        $this->theme->setTitle("Detaljer för användare");
         
+        // If logged in, fetch user from session
+        if ($this->session->has('username')) {
+            $loggedIn = $this->session->get('username');
+        
+        } else {
+            $loggedIn = "";
+        }
+ 
+        // User details
+        $this->theme->setTitle("Detaljer för användare");
         $this->views->add('users/view', [
-            'user'  => $user
+            'user'  => $user,
+            'loggedIn' => $loggedIn
         ]);
         
-        
+        // User posts
         $this->dispatcher->forward([
             'controller' => 'users',
             'action'     => 'user-posts',
@@ -174,6 +184,77 @@ class UsersController implements \Anax\DI\IInjectionAware
         ]);
         
     }
+    
+    
+    
+    /**
+     * User login form
+     *
+     * @return void
+     */
+    public function loginAction()
+    {
+       
+        // Is user already logged in?
+        if ($this->session->has('username')) {
+            
+            $html = "<img src='" . $this->session->get('user_gravatar') . "' alt='" . $this->session->get('username') . "' title='" . $this->session->get('username') . "'><br>";
+            $html .= "<p>Du är redan inloggad som \"" . $this->session->get('username') . "\". Vill du logga ut?</p>";
+            $html .= "<a href='" . $this->url->create('users/logout') . "'>Logga ut</a>";
+            
+            $this->theme->setTitle("Logga ut");
+            $this->views->add('default/page', [
+                'title' => "Logga ut, " . $this->session->get('username') . "?",
+                'content' => $html
+            ]);
+            
+        } else {
+        
+            // Create login form
+            $form = new \Idun\HTMLForm\FormUserLogin();
+            $form->setDI($this->di);
+            $status = $form->check();
+        
+            $this->theme->setTitle("Logga in");
+            $this->views->add('default/page', [
+                'title' => "Logga in",
+                'content' => $form->getHTML()
+            ]);
+            
+            $this->views->add('users/create');
+        
+        }
+        
+    }
+    
+    
+    
+    /**
+     * Logout user
+     *
+     * @return void
+     */
+    public function logoutAction()
+    {
+        $url = $this->url->create('');
+        
+        // Is user is already logged out?
+        if ($this->session->has('username')) {
+            
+            // Remove user details from session
+            $this->session->delete('user_id');
+            $this->session->delete('username');
+            $this->session->delete('user_gravatar');
+            
+            return  header("Location: $url");
+        
+        } else {
+            // Redirect to start page
+            return header("Location: $url");
+        }
+        
+    }
+    
     
     
 

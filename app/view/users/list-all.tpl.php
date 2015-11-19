@@ -11,5 +11,3 @@
     </tr> 
 <?php endforeach; ?>
 </table>
-
-<p><i class="fa fa-user-plus"></i> <a href="<?=$this->url->create('users/add')?>">Skapa ny användare</a></p>

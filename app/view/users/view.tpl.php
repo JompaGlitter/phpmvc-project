@@ -1,20 +1,22 @@
 <!-- User info -->
 <img src="<?=$user->gravatar?>" title="<?=$user->username?>" alt="<?=$user->username?>">
 
-<h2><?=$user->username?></h2>
-<?=$user->about?>
+<h2><?=htmlentities($user->username)?></h2>
+<?=$this->textFilter->doFilter($user->about, 'nl2br, markdown')?>
 
 <p>
     <small>
-    <strong>E-mail:</strong> <a href="mailto:<?=$user->email?>"><?=$user->email?></a><br>
-    <strong>Hemsida:</strong> <a href="<?=$user->homepage?>"><?=$user->homepage?></a><br>
-    <strong>Medlem sedan </strong> <?=$user->created?>
+    <strong>E-mail:</strong> <a href="mailto:<?=htmlentities($user->email)?>"><?=htmlentities($user->email)?></a><br>
+    <strong>Hemsida:</strong> <a href="<?=htmlentities($user->homepage)?>"><?=htmlentities($user->homepage)?></a><br>
+    <strong>Medlem sedan </strong> <?=htmlentities($user->created)?>
     </small>
 </p>
 
+<?php if ($user->username == $loggedIn) : ?>
 <p>
     <i class="fa fa-pencil-square-o"></i> <a href="<?=$this->url->create('users/update/' . $user->id)?>">Uppdatera</a>
 </p>
+<?php endif; ?>
 
 
 <p>

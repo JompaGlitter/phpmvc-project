@@ -84,10 +84,6 @@ class FormAddQuestionComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $this->AddOutput("<p><i>DoSubmit(): Form was submitted. Do stuff (save to database) and return true (success) or false (failed processing form)</i></p>");
-        //$this->AddOutput("<p><b>Name: " . $this->Value('name') . "</b></p>");
-        //$this->AddOutput("<p><b>Email: " . $this->Value('email') . "</b></p>");
-        //$this->AddOutput("<p><b>Phone: " . $this->Value('phone') . "</b></p>");
 
         $this->comments = new \Idun\Comments\Comments();
         $this->comments->setDI($this->di);
@@ -113,7 +109,6 @@ class FormAddQuestionComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>");
         
         $url = 'forum/view-question/' . $this->question_id;
         $this->redirectTo($url);
@@ -128,7 +123,6 @@ class FormAddQuestionComment extends \Mos\HTMLForm\CForm
      */
     public function callbackFail()
     {
-        $this->AddOutput("<p><i>Form was submitted and the Check() method returned false.</i></p>");
         $this->redirectTo();
     }
 } 
