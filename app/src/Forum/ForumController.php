@@ -539,5 +539,210 @@ class ForumController implements \Anax\DI\IInjectionAware
         
     }
     
+    
+    
+    /**
+     * Setup database and populate with default content
+     *
+     */
+    public function setupAction()
+    {
+        
+        $sql = "/* 
+ * create User table with content
+ */
+DROP TABLE IF EXISTS Users;
+CREATE TABLE Users 
+(
+	id INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(100) NOT NULL,
+	email VARCHAR(100),
+	password VARCHAR(255) NOT NULL,
+	about TEXT,
+	homepage VARCHAR(255),
+	gravatar VARCHAR(255) NOT NULL,
+	created DATETIME,
+	updated DATETIME,
+	PRIMARY KEY (id)
+) ENGINE = InnoDB;
+
+INSERT INTO Users (username, password, about, email, homepage, gravatar, created) VALUES
+(
+	'JompaGlitter',
+	'$2y$10\$FYUPUNX9Dt.JU0cS9hgkKuMn8S83cvXSKnijy0RCGzysz09j5Gd2u',
+	'En blivande programmerare',
+	'jonfredelius@gmail.com',
+	'http://www.jonfredelius.com',
+	'http://www.gravatar.com/avatar/default_image',
+	NOW()
+),
+(
+	'Venlisch',
+	'$2y$10$7BGfnsP1WzvlPExga1rnBeqwW8hWjA4aSrri1BayXX0ksar1e/d8a',
+	'Musiklärare som även programmerar lite',
+	'venla@hinnemo.se',
+	NULL,
+	'http://www.gravatar.com/avatar/default_image',
+	NOW()
+),
+(
+	'Joshua',
+	'$2y$10\$rngy4YnM5HeStWzoACTlCOTWMfQTlyIdGwrtoIaC4us0/686I.f2e',
+	'Elit-surfare med smak för kodning',
+	'joshua.ladimer@live.com',
+	NULL,
+	'http://www.gravatar.com/avatar/default_image',
+	NOW()
+),
+(
+	'fliXen',
+	'$2y$10\$bcwj9SR7731LbOuMTrzI1OQD10z9P4RQrO.a3ibwq/KnD5zEbRM2K',
+	'En dryg sate med inget intresse för programmering. Att jävlas är däremot kul!',
+	'flixen@hotmail.com',
+	NULL,
+	'http://www.gravatar.com/avatar/default_image',
+	NOW()
+);
+
+
+/*
+ * create Question table with content
+ */
+DROP TABLE IF EXISTS Questions;
+CREATE TABLE Questions 
+(
+	id INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(100) NOT NULL,
+	title VARCHAR(255) NOT NULL,
+	text TEXT NOT NULL,
+	created DATETIME,
+	updated DATETIME,
+	PRIMARY KEY (id)
+) ENGINE = InnoDB;
+
+INSERT INTO Questions (username, title, text, created) VALUES
+(
+	'JompaGlitter',
+	'Vilket programmeringsspråk?',
+	'Vilket programmeringsspråk ska man satsa på framöver? PHP, JavaScript? Eller något annat?',
+	NOW()
+),
+(
+	'Venlisch',
+	'Att programmera eller inte',
+	'Ska man programmera eller skriva musik, det är frågan. Vad tycker ni?',
+	NOW()
+);
+
+
+/*
+ * create Answer table with content
+ */
+DROP TABLE IF EXISTS Answers;
+CREATE TABLE Answers 
+(
+	id INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(100) NOT NULL,
+	question_id INT NOT NULL,
+	text TEXT NOT NULL,
+	created DATETIME,
+	PRIMARY KEY (id)
+) ENGINE = InnoDB;
+
+INSERT INTO Answers (username, question_id, text, created) VALUES
+(
+	'Idun',
+	1,
+	'Du ska lätt satsa på JavaScript, det är störst efterfrågan på den kompetensen just nu.',
+	NOW()
+),
+(
+	'fliXen',
+	2,
+	'Äh, skit i allt och spela tv-spel och kolla film istället! =D',
+	NOW()
+);
+
+
+/*
+ * create Comments table with content
+ */
+DROP TABLE IF EXISTS Comments;
+CREATE TABLE Comments 
+(
+	id INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(100) NOT NULL,
+	question_id INT,
+	answer_id INT,
+	text TEXT NOT NULL,
+	created DATETIME,
+	PRIMARY KEY (id)
+) ENGINE = InnoDB;
+
+INSERT INTO Comments (username, question_id, answer_id, text, created) VALUES
+(
+	'Venlisch',
+	1,
+	NULL,
+	'Den här frågan har varit uppe förut och fått ett bra svar.',
+	NOW()	
+),
+(
+	'Joshua',
+	NULL,
+	1,
+	'Jag håller med dig till viss del, men PHP är alltid bra att ha också, speciellt tillsammans med SQL.',
+	NOW()
+),
+(
+	'JompaGlitter',
+	NULL,
+	2,
+	'Så tråkigt är det inte med programmering! Nu tycker jag att du är lite väl negativ...',
+	NOW()
+),
+(
+	'fliXen',
+	NULL,
+	2,
+	'Men du då!',
+	NOW()
+);
+
+
+/*
+ * create Tags table with content
+ */
+DROP TABLE IF EXISTS Tags;
+CREATE TABLE Tags
+(
+	id INT NOT NULL AUTO_INCREMENT,
+	tag VARCHAR(100),
+	PRIMARY KEY (id)
+) ENGINE = InnoDB;
+
+INSERT INTO Tags (tag) VALUES ('sql'), ('php'), ('javascript');
+
+
+/*
+ * create ER table between Questions and Tags
+ */
+DROP TABLE IF EXISTS Questions_Tags;
+CREATE TABLE Questions_Tags
+(
+	questions_id INT NOT NULL,
+	tags_id INT NOT NULL
+) ENGINE = InnoDB;
+
+INSERT INTO Questions_Tags (questions_id, tags_id) Values (1, 1), (1, 2), (1, 3), (2, 1), (2, 2);
+";
+
+        $this->db->execute($sql);
+        
+        $url = $this->url->create('');
+        header("Location: $url");
+        
+    }
+    
 
 }

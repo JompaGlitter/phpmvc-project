@@ -149,7 +149,7 @@ $app->router->add('about', function() use ($app) {
     $content  = $app->fileContent->get('wgtotw.md');
     $content  = $app->textFilter->doFilter($content, 'nl2br, markdown');
     
-    // View for main and byline content
+    // Presentation view
     $app->views->add('default/article', [
         'content' => $content
     ]);
@@ -172,6 +172,19 @@ $app->router->add('source', function() use ($app) {
     
     $app->views->add('source/source', [
        'content' => $source->View(), 
+    ]);
+
+});
+
+
+
+// Rout to show source code
+$app->router->add('setup', function() use ($app) {
+    
+    // Forward to login form.
+    $app->dispatcher->forward([
+        'controller'    => 'forum',
+        'action'        => 'setup'
     ]);
 
 });
