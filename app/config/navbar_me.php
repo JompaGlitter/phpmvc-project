@@ -59,14 +59,6 @@ return [
             'url'   => $this->di->get('url')->create('login'),
             'title' => 'Logga in',
         ],
- 
-        // This is a menu item
-        'source' => [
-            'text'  =>'Källkod',
-            'url'   => $this->di->get('url')->create('source'),
-            'title' => 'Sidans källkod',
-            'mark-if-parent-of' => 'controller',
-        ],
         
     ],
  

@@ -1,4 +1,4 @@
-<h2><?=$tag->tag?></h2>
+<h2>Tagg: <?=$tag->tag?></h2>
 <p>Nedan listas frågor med taggen <strong><?=$tag->tag?></strong>.</p>
 
 <!-- Loop out tag related questions -->

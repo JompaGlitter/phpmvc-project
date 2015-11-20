@@ -56,5 +56,12 @@ class CDIFactory extends \Anax\DI\CDIFactoryDefault
             return $controller;
         });
         
+        // Inject the forum controller into the app
+        $this->set('sessionmodel', function () {
+            $sessionmodel = new \Idun\Session\CSessionModel();
+            $sessionmodel->setDI($this);
+            return $sessionmodel;
+        });
+        
     }
 }

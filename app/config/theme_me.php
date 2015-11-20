@@ -62,7 +62,7 @@ return [
         'title_append' => ' | Idun web template',
 
         // Stylesheets
-        'stylesheets' => ['css/style.css', 'css/navbar_me.css', 'css/anax-grid/font-awesome-4.4.0/css/font-awesome.css'],
+        'stylesheets' => ['css/style.css', 'css/navbar_me.css', 'css/anax-grid/font-awesome-4.4.0/css/font-awesome.css', 'css/form.css'],
 
         // Inline style
         'style' => null,

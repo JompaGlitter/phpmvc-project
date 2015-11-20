@@ -117,54 +117,64 @@ class FormAddQuestion extends \Mos\HTMLForm\CForm
         $this->taggar->setDI($this->di);
         
         // Create array of tags from form input
-        $form_tags = explode(',', trim($this->Value('tags')));
+        //$form_tags = explode(',', trim($this->Value('tags')));
+        $form_tags = explode(',', str_replace(' ', '', strtolower($this->Value('tags'))));
+//echo "<pre>" . var_dump($form_tags) . "</pre>";
+        
         // Create array of existing tags supplied by the construct method
-        $existing_tags = array_column($this->dbTags, 'tag');
-        var_dump($existing_tags);
-        //var_dump($existing_tags);
-        exit();
+        foreach ($this->dbTags as $tag) {
+            $existing_tags[] = $tag->tag;
+        }
+
         // Do all tags exist in database?
         foreach ($form_tags as $form_tag) {
             if(!in_array($form_tag, $existing_tags)) {
                 
                 // Store tag i database if it doesnt exist
-                $this->taggar->save([
+                $this->taggar->create([
                     'tag' => $form_tag
                 ]);
             }
         }
-        
+//exit();
         
         //
         // Save tags relations in database
         //
         
         $this->qt = new \Idun\Questions_Tags\Questions_Tags();
-        $this->taggar->setDI($this->di);
+        $this->qt->setDI($this->di);
         
         // Fetch all tags from database
         $all_tags = $this->taggar->findAll();
+        //foreach ($all_tags as $tag) {
+          //  $db_tags[] = $tag;
+        //}
+        
         // Fetch id for saved question
         $question = $this->questions->query("id")
                                     ->where("title = ?")
                                     ->execute(array($this->Value("title")));
+        foreach ($question as $key) {
+            $question_id[] = $key->id;
+        }
         
         // Save keys in the Questions_Tags relations table
         foreach ($form_tags as $form_tag) {
             
             foreach ($all_tags as $key => $value) {
-                
-                if ($form_tag == $value->id) {
+//echo "<pre>" . var_dump($value) . "</pre";
+                if ($form_tag == $value->tag) {
                     
-                    $this->qt->save([
-                        'questions_id' => $question->id,
+                    $this->qt->create([
+                        'questions_id' => $question_id[0],
                         'tags_id' => $value->id
                     ]);
                 }
             }
         }
         
-        exit();
+//exit();
 
         return $save ? true : false;
     }

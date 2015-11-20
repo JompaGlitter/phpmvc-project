@@ -106,7 +106,7 @@ class UsersController implements \Anax\DI\IInjectionAware
     /**
      * Update user.
      *
-     * @param string $id of user to update.
+     * @param int $id of user to update.
      *
      * @return void
      */
@@ -115,27 +115,40 @@ class UsersController implements \Anax\DI\IInjectionAware
         if (!isset($id)) {
             die("Missing id");
         }
+        
+        if ($this->session->get('user_id') !== $id) {
+            die("WROOOOONG! You are not allowed to edit other users information.");
+        }
 
-        $this->db->select('username, about, email, homepage AS url')
-                 ->from('Users')
-                 ->where('id = ' . $id)
-                 ->execute();
-        $user = $this->db->fetchOne();
+        if ($this->session->has('username')) {
+        
+            $this->db->select('username, about, email, homepage AS url')
+                     ->from('Users')
+                     ->where('id = ' . $id)
+                     ->execute();
+            $user = $this->db->fetchOne();
 
-        $username = $user->username;
-        $about = $user->about;
-        $email = $user->email;
-        $url = $user->url;
+            $username = $user->username;
+            $about = $user->about;
+            $email = $user->email;
+            $url = $user->url;
 
-        $form = new \Idun\HTMLForm\FormUpdateUser($id, $username, $about, $email, $url);
-        $form->setDI($this->di);
-        $status = $form->check();
+            $form = new \Idun\HTMLForm\FormUpdateUser($id, $username, $about, $email, $url);
+            $form->setDI($this->di);
+            $status = $form->check();
 
-        $this->theme->setTitle("Redigera användare");
-        $this->views->add('default/page', [
-            'title' => "Redigera användare",
-            'content' => $form->getHTML()
-        ]);
+            $this->theme->setTitle("Redigera användare");
+            $this->views->add('default/page', [
+                'title' => "Redigera användare",
+                'content' => $form->getHTML()
+            ]);
+        
+        } else {
+            $url = $this->url->create('');
+            // Redirect to start page
+            return header("Location: $url");
+        }
+        
     } 
     
     
@@ -200,7 +213,7 @@ class UsersController implements \Anax\DI\IInjectionAware
             
             $html = "<img src='" . $this->session->get('user_gravatar') . "' alt='" . $this->session->get('username') . "' title='" . $this->session->get('username') . "'><br>";
             $html .= "<p>Du är redan inloggad som \"" . $this->session->get('username') . "\". Vill du logga ut?</p>";
-            $html .= "<a href='" . $this->url->create('users/logout') . "'>Logga ut</a>";
+            $html .= "<i class='fa fa-times-circle'></i> <a href='" . $this->url->create('users/logout') . "'>Logga ut</a>";
             
             $this->theme->setTitle("Logga ut");
             $this->views->add('default/page', [
@@ -242,9 +255,9 @@ class UsersController implements \Anax\DI\IInjectionAware
         if ($this->session->has('username')) {
             
             // Remove user details from session
-            $this->session->delete('user_id');
-            $this->session->delete('username');
-            $this->session->delete('user_gravatar');
+            $this->sessionmodel->delete('user_id');
+            $this->sessionmodel->delete('username');
+            $this->sessionmodel->delete('user_gravatar');
             
             return  header("Location: $url");
         

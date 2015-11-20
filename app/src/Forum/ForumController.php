@@ -358,6 +358,10 @@ class ForumController implements \Anax\DI\IInjectionAware
      */
     public function addAnswerAction($id)
     {
+        if (!isset($id)) {
+            die("Missing id");
+        }
+        
         // Is user logged in?
         if ($this->session->has('username')) {
         
@@ -423,6 +427,10 @@ class ForumController implements \Anax\DI\IInjectionAware
     public function addQuestionCommentAction($id)
     {
         
+        if (!isset($id)) {
+            die("Missing id");
+        }
+        
         // Is user logged in?
         if ($this->session->has('username')) {
         
@@ -487,6 +495,10 @@ class ForumController implements \Anax\DI\IInjectionAware
      */
     public function addAnswerCommentAction($id)
     {
+        
+        if (!isset($id)) {
+            die("Missing id");
+        }
         
         // Is user logged in?
         if ($this->session->has('username')) {
