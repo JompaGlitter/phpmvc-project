@@ -20,6 +20,6 @@ The guide assumes that you have git and composer installed on your computer. If 
 
 
 ##Warning
-The discussion forum do so far **not support editing existing questions, answers or comments**. So be careful what you right or you will be forced to manually remove the input from the database or use the setup sequence to restore the entire forum to default values.
+The discussion forum do so far **not support editing existing questions, answers or comments**. So be careful what you write or you will be forced to manually remove the input from the database or use the setup sequence to restore the entire forum to default values.
 
 Use the forum like you use instant chats like IRC, Skype, Facebook Messenger etc. That is with care!
