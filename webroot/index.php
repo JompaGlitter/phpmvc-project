@@ -146,11 +146,13 @@ $app->router->add('about', function() use ($app) {
 
     $app->theme->setTitle('Om sidan');
     
-    // Prepare some page presentation.
-    $app->theme->setVariable('main', "
-                   <h2>Om sidan</h2>
-                   <p>En liten presentation av sidan och mig som skapare kommer snart här.</p>
-                   ");
+    $content  = $app->fileContent->get('wgtotw.md');
+    $content  = $app->textFilter->doFilter($content, 'nl2br, markdown');
+    
+    // View for main and byline content
+    $app->views->add('default/article', [
+        'content' => $content
+    ]);
 
 });
 

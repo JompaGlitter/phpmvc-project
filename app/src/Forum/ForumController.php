@@ -336,7 +336,12 @@ class ForumController implements \Anax\DI\IInjectionAware
             $this->views->add('default/page', [
                 'title' => "Skapa ny fråga",
                 'content' => $form->getHTML()
-        ]);
+            ]);
+            
+                $this->dispatcher->forward([
+                    'controller' => 'forum',
+                    'action' => 'view-all-tags'
+                ]);
         
         } else {
             

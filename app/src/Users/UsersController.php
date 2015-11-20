@@ -23,11 +23,11 @@ class UsersController implements \Anax\DI\IInjectionAware
             $users = $i_users;
             
         } else {
+            
         $this->db->select('id, username, gravatar, created')
                  ->from('Users')
                  ->orderBy('username ASC')
                  ->execute();
-        
         $users = $this->db->fetchAll();
         } 
         
